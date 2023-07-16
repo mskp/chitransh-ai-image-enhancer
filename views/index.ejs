@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chitraksh: AI Image Enhancer</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <style>
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+        margin-bottom: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-4">
+      <h1 class="text-3xl mb-4 text-center">Upload Image 🐮</h1>
+      <div class="flex justify-center">
+        <form id="uploadForm" enctype="multipart/form-data" class="text-center">
+          <input
+            type="file"
+            name="imageFile"
+            accept="image/*"
+            class="mb-2 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-500 bg-gray-50"
+          />
+          <button
+            type="submit"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Upload
+          </button>
+        </form>
+      </div>
+      <div class="flex justify-between mt-4">
+        <div
+          id="uploadedImageContainer"
+          class="w-1/2 pr-2 flex flex-col items-center"
+        >
+          <h3 id="uploadedImageTitle" class="text-xl mb-2 text-center">
+            Before:
+          </h3>
+          <div id="beforeLoadingSpinner" class="loader hidden"></div>
+          <img
+            id="uploadedImage"
+            class="max-w-full h-auto max-h-96 mb-2 hidden"
+          />
+        </div>
+        <div
+          id="processedImageContainer"
+          class="w-1/2 pl-2 flex flex-col items-center"
+        >
+          <h3 id="processedImageTitle" class="text-xl mb-2 text-center">
+            After:
+          </h3>
+          <div id="afterLoadingSpinner" class="loader hidden"></div>
+          <img
+            id="processedImage"
+            class="max-w-full h-auto max-h-96 mb-2 hidden"
+          />
+          <a
+            id="downloadButton"
+            href="#"
+            target="_blank"
+            download
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded hidden"
+            >Download</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const uploadForm = document.getElementById("uploadForm");
+      const uploadedImageContainer = document.getElementById(
+        "uploadedImageContainer"
+      );
+      const processedImageContainer = document.getElementById(
+        "processedImageContainer"
+      );
+      const processedImageTitle = document.getElementById(
+        "processedImageTitle"
+      );
+      const processedImage = document.getElementById("processedImage");
+      const uploadedImageTitle = document.getElementById("uploadedImageTitle");
+      const uploadedImage = document.getElementById("uploadedImage");
+      const downloadButton = document.getElementById("downloadButton");
+      const beforeLoadingSpinner = document.getElementById(
+        "beforeLoadingSpinner"
+      );
+      const afterLoadingSpinner = document.getElementById(
+        "afterLoadingSpinner"
+      );
+
+      uploadForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        uploadedImage.classList.add("hidden");
+        processedImage.classList.add("hidden");
+        downloadButton.classList.add("hidden");
+
+        const formData = new FormData(uploadForm);
+
+        // Display loading spinner
+        beforeLoadingSpinner.classList.remove("hidden");
+        afterLoadingSpinner.classList.remove("hidden");
+
+        fetch("/", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // Hide loading spinner
+            beforeLoadingSpinner.classList.add("hidden");
+            afterLoadingSpinner.classList.add("hidden");
+
+            if (data.uploadedImage) {
+              uploadedImage.classList.remove("hidden");
+              uploadedImageTitle.classList.remove("hidden");
+              uploadedImage.src = `${data.uploadedImage}?v=${Date.now()}`;
+            }
+            if (data.processedImage) {
+              processedImage.classList.remove("hidden");
+              processedImageTitle.classList.remove("hidden");
+              processedImage.src = data.processedImage;
+              downloadButton.href = data.processedImage;
+              downloadButton.classList.remove("hidden");
+            }
+          })
+          .catch((error) => {
+            // Hide loading spinner
+            beforeLoadingSpinner.classList.add("hidden");
+            afterLoadingSpinner.classList.add("hidden");
+
+            console.error(error);
+          });
+      });
+    </script>
+  </body>
+</html>
