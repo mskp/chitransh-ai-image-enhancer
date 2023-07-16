@@ -9,7 +9,7 @@ const app = express();
 const port = 8000;
 const UPLOADED_PATH = "public/uploadedImage.png";
 
-app.use(express.static("static"));
+app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
